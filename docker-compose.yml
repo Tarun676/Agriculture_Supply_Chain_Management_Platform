@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  agri-db:
+    image: postgres:15-alpine
+    container_name: agri-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: agri_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - agri-network
+
+  agri-pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: agri-pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@agriplatform.com
+      PGADMIN_DEFAULT_PASSWORD: adminpassword
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - agri-db
+    networks:
+      - agri-network
+
+networks:
+  agri-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  pgadmin_data:
+    driver: local

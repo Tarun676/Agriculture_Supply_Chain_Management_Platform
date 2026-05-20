@@ -1,0 +1,42 @@
+# Maven & Java
+target/
+*.class
+*.jar
+*.war
+*.ear
+.mvn/wrapper/
+.metadata/
+bin/
+tmp/
+*.db
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# VS Code
+.vscode/
+
+# Node & Frontend
+node_modules/
+dist/
+dist-ssr/
+*.local
+.env
+.env.*
+
+# Docker & Databases
+postgres_data/
+pgadmin_data/
+
+# OS specific
+.DS_Store
+Thumbs.db
