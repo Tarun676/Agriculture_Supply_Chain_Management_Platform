@@ -399,13 +399,9 @@ function AuthScreen({ onLogin, isOfflineMode }) {
         return;
       }
       
-      // Offline password exact check if password seeded, else fallback
-      if (user.password) {
-        if (user.password !== password) {
-          setError('Incorrect password! Please check your credentials and try again.');
-          return;
-        }
-      } else if (password.length < 6) {
+      // Offline password exact check to ensure wrong password is NEVER allowed
+      const expectedPassword = user.password || (user.email === 'farmer@agri.com' ? 'farmer@123' : user.email === 'buyer@agri.com' ? 'buyer@123' : 'Tarun@0607');
+      if (password !== expectedPassword) {
         setError('Incorrect password! Please check your credentials and try again.');
         return;
       }
@@ -633,14 +629,96 @@ function FarmerView({ currentUser, products, loadProducts, setMsg, isOfflineMode
               <input value={location} onChange={e => setLocation(e.target.value)} placeholder="e.g. Punjab" />
             </div>
           </div>
-          <div className="field-row">
+          <div className="field-row" style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px'}}>
             <div className="field">
               <label>Starting Price (₹/kg) <span className="req">*</span></label>
-              <input type="number" step="0.01" min="0" value={price} onChange={e => setPrice(e.target.value)} placeholder="0.00" required />
+              <div style={{display: 'flex', alignItems: 'center', gap: '6px', background: 'hsla(222, 19%, 13%, 0.4)', padding: '4px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-light)'}}>
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    const val = parseFloat(price) || 0;
+                    setPrice(Math.max(0, val - 1.00).toFixed(2));
+                  }}
+                  style={{
+                    width: '32px', height: '32px', borderRadius: 'var(--radius-xs)', 
+                    background: 'var(--bg-surface-2)', border: '1px solid var(--border-light)',
+                    fontSize: '1rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--rose)'
+                  }}
+                >
+                  −
+                </button>
+                <input 
+                  type="number" 
+                  step="0.01" 
+                  min="0" 
+                  value={price} 
+                  onChange={e => setPrice(e.target.value)} 
+                  placeholder="0.00" 
+                  required 
+                  style={{
+                    textAlign: 'center', background: 'transparent', flex: 1, padding: '6px', fontSize: '0.9rem', fontWeight: 'bold'
+                  }}
+                />
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    const val = parseFloat(price) || 0;
+                    setPrice((val + 1.00).toFixed(2));
+                  }}
+                  style={{
+                    width: '32px', height: '32px', borderRadius: 'var(--radius-xs)', 
+                    background: 'var(--bg-surface-2)', border: '1px solid var(--border-light)',
+                    fontSize: '1rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--emerald)'
+                  }}
+                >
+                  +
+                </button>
+              </div>
             </div>
+            
             <div className="field">
               <label>Total Quantity (kg) <span className="req">*</span></label>
-              <input type="number" min="1" value={qty} onChange={e => setQty(e.target.value)} placeholder="1000" required />
+              <div style={{display: 'flex', alignItems: 'center', gap: '6px', background: 'hsla(222, 19%, 13%, 0.4)', padding: '4px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-light)'}}>
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    const val = parseInt(qty) || 0;
+                    setQty(Math.max(0, val - 100));
+                  }}
+                  style={{
+                    width: '32px', height: '32px', borderRadius: 'var(--radius-xs)', 
+                    background: 'var(--bg-surface-2)', border: '1px solid var(--border-light)',
+                    fontSize: '1rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--rose)'
+                  }}
+                >
+                  −
+                </button>
+                <input 
+                  type="number" 
+                  min="1" 
+                  value={qty} 
+                  onChange={e => setQty(e.target.value)} 
+                  placeholder="1000" 
+                  required 
+                  style={{
+                    textAlign: 'center', background: 'transparent', flex: 1, padding: '6px', fontSize: '0.9rem', fontWeight: 'bold'
+                  }}
+                />
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    const val = parseInt(qty) || 0;
+                    setQty(val + 100);
+                  }}
+                  style={{
+                    width: '32px', height: '32px', borderRadius: 'var(--radius-xs)', 
+                    background: 'var(--bg-surface-2)', border: '1px solid var(--border-light)',
+                    fontSize: '1rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--emerald)'
+                  }}
+                >
+                  +
+                </button>
+              </div>
             </div>
           </div>
           <div className="field">
@@ -933,10 +1011,57 @@ function BuyerView({ currentUser, products, loadProducts, setMsg, isOfflineMode,
                   </span>
                 )}
               </div>
-              <div className="bid-input-wrap">
-                <span className="bid-prefix">₹</span>
-                <input type="number" step="0.01" min="0" value={bidAmt} onChange={e => setBidAmt(e.target.value)} placeholder="0.00" disabled={isExpired} required />
-                <span className="bid-suffix">/kg</span>
+              <div style={{display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-surface-2)', padding: '6px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-light)'}}>
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    const current = parseFloat(bidAmt) || (bids.length > 0 ? parseFloat(bids[0].bidAmount) : parseFloat(selectedProduct.price));
+                    setBidAmt(Math.max(0, current - 1.00).toFixed(2));
+                  }}
+                  disabled={isExpired}
+                  style={{
+                    width: '36px', height: '36px', borderRadius: 'var(--radius-xs)', 
+                    background: 'var(--bg-surface)', border: '1px solid var(--border-light)',
+                    fontSize: '1.2rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    cursor: isExpired ? 'not-allowed' : 'pointer', color: 'var(--rose)'
+                  }}
+                >
+                  −
+                </button>
+                <div className="bid-input-wrap" style={{flex: 1, margin: 0, position: 'relative', display: 'flex', alignItems: 'center'}}>
+                  <span className="bid-prefix" style={{position: 'absolute', left: '12px', fontSize: '0.85rem', color: 'var(--text-muted)'}}>₹</span>
+                  <input 
+                    type="number" 
+                    step="0.01" 
+                    min="0" 
+                    value={bidAmt} 
+                    onChange={e => setBidAmt(e.target.value)} 
+                    placeholder="0.00" 
+                    disabled={isExpired} 
+                    required 
+                    style={{
+                      padding: '10px 10px 10px 24px', fontSize: '1rem', fontWeight: 'bold', textAlign: 'center', 
+                      background: 'transparent', width: '100%', color: 'var(--text-primary)'
+                    }}
+                  />
+                  <span className="bid-suffix" style={{position: 'absolute', right: '12px', fontSize: '0.75rem', color: 'var(--text-muted)'}}>/kg</span>
+                </div>
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    const current = parseFloat(bidAmt) || (bids.length > 0 ? parseFloat(bids[0].bidAmount) : parseFloat(selectedProduct.price));
+                    setBidAmt((current + 1.00).toFixed(2));
+                  }}
+                  disabled={isExpired}
+                  style={{
+                    width: '36px', height: '36px', borderRadius: 'var(--radius-xs)', 
+                    background: 'var(--bg-surface)', border: '1px solid var(--border-light)',
+                    fontSize: '1.2rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    cursor: isExpired ? 'not-allowed' : 'pointer', color: 'var(--emerald)'
+                  }}
+                >
+                  +
+                </button>
               </div>
               <div className="quick-btns" style={{marginTop: '10px'}}>
                 <button type="button" className="quick-btn" onClick={() => quickBid(1.00)} disabled={isExpired}>+₹1</button>

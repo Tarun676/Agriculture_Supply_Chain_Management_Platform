@@ -1007,3 +1007,42 @@ a {
   border-color: var(--border-light) !important;
 }
 
+/* Quick Bid Preset Action Chips */
+.quick-btns {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 8px !important;
+  margin-top: 12px !important;
+}
+.quick-btn {
+  padding: 8px 12px !important;
+  background: var(--bg-surface-2) !important;
+  border: 1px solid var(--border-light) !important;
+  border-radius: var(--radius-xs) !important;
+  color: var(--text-secondary) !important;
+  font-size: 0.78rem !important;
+  font-weight: 800 !important;
+  text-align: center !important;
+  box-shadow: var(--shadow-sm) !important;
+  transition: all var(--motion-fast) !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+.quick-btn:hover:not(:disabled) {
+  background: var(--blue-dim) !important;
+  color: var(--blue) !important;
+  border-color: hsla(217, 91%, 60%, 0.3) !important;
+  box-shadow: 0 4px 12px var(--blue-glow) !important;
+  transform: translateY(-1.5px) !important;
+}
+.quick-btn:active:not(:disabled) {
+  transform: translateY(0) !important;
+}
+.quick-btn:disabled {
+  opacity: 0.4 !important;
+  cursor: not-allowed !important;
+}
+
+
