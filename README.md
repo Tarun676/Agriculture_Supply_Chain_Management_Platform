@@ -106,15 +106,13 @@ docker compose up -d --build
 
 ---
 
-## 🎭 Pre-registered Presentation Credentials
+## 🎭 Role-Based Enterprise Workspaces
 
-Use these verified platform accounts to demonstrate role-based workflows:
+The platform automates account provisioning via database seeding on startup. During demonstrations, you can toggle between three secure structural workspaces to show complete logic isolation:
 
-| Role | Email Address | Password | Features to Showcase |
-| :--- | :--- | :--- | :--- |
-| **Root Admin** | `penumuditarun@gmail.com` | `Tarun@0607` | Statistical KPIs, registry tables, live scrolling transaction flow monitor, and Auction Audit Reports. |
-| **Organic Grower** | `farmer@agri.com` | `farmer@123` | Publish new crop harvests, select state, customize flash-bidding countdown timers, and live grower auction deck. |
-| **Institutional Buyer** | `buyer@agri.com` | `buyer@123` | Real-time bidding desks, live minimum bid calculation limits, outbid alert toasts, and visual lockouts. |
+*   **Executive Administration Desk:** Tracks active listing margins, automates member registers, monitors transaction flow rates, and reviews official chronological audit logs.
+*   **Grower Harvesting Desk:** Publishes organic crops, customizes regions, triggers categories, and governs live grower countdown auctions.
+*   **Wholesale Bidding Desk:** Searches state-level products, calculates minimum increment bounds, and syncs real-time WebSocket outbid alerts.
 
 ---
 
