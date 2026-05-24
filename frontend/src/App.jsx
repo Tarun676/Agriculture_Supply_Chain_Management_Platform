@@ -1623,14 +1623,27 @@ export default function App() {
   };
 
   const loadProducts = () => {
+    if (!currentUser) return;
     if (isOfflineMode) { 
       setProducts(sortProducts(getDB().products)); 
       return; 
     }
     fetch(`${API_BASE_URL}/products`, { headers })
-      .then(r => r.json())
-      .then(data => setProducts(sortProducts(data)))
-      .catch(() => {
+      .then(r => {
+        if (!r.ok) {
+          throw new Error("HTTP error " + r.status);
+        }
+        return r.json();
+      })
+      .then(data => {
+        if (Array.isArray(data)) {
+          setProducts(sortProducts(data));
+        } else {
+          console.error("Expected array from products API, got:", data);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load products:", err);
         setIsOfflineMode(true);
         setProducts(sortProducts(getDB().products));
       });
@@ -1694,8 +1707,8 @@ export default function App() {
     const checkConnection = () => {
       fetch(`${API_BASE_URL}/products`, { headers })
         .then(r => {
-          // If the server returns 200 (ok) or 401 (unauthorized), it is alive and actively listening!
-          if (r.ok || r.status === 401) {
+          // If the server returns 200 (ok), 401 (unauthorized), or 403 (forbidden), it is alive and actively listening!
+          if (r.ok || r.status === 401 || r.status === 403) {
             setIsOfflineMode(false);
           } else {
             setIsOfflineMode(true);
@@ -1713,7 +1726,7 @@ export default function App() {
     const interval = setInterval(() => {
       fetch(`${API_BASE_URL}/products`, { headers })
         .then(r => {
-          if (r.ok || r.status === 401) {
+          if (r.ok || r.status === 401 || r.status === 403) {
             setIsOfflineMode(false);
           }
         })
@@ -1723,9 +1736,13 @@ export default function App() {
     }, 2000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [currentUser]);
 
-  useEffect(() => { loadProducts(); }, [currentUser, isOfflineMode]);
+  useEffect(() => { 
+    if (currentUser) {
+      loadProducts(); 
+    }
+  }, [currentUser, isOfflineMode]);
 
   const logout = () => {
     setCurrentUser(null);
