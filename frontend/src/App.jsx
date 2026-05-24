@@ -1689,14 +1689,36 @@ export default function App() {
     };
   }, [currentUser]);
 
-  // Initial connection checks
+  // Initial connection checks with live polling to auto-promote to Live Mode
   useEffect(() => {
-    fetch(`${API_BASE_URL}/products`, { headers })
-      .then(r => {
-        if (!r.ok) throw new Error();
-        setIsOfflineMode(false);
-      })
-      .catch(() => setIsOfflineMode(true));
+    const checkConnection = () => {
+      fetch(`${API_BASE_URL}/products`, { headers })
+        .then(r => {
+          if (!r.ok) throw new Error();
+          setIsOfflineMode(false);
+        })
+        .catch(() => {
+          setIsOfflineMode(true);
+        });
+    };
+
+    // Initial check
+    checkConnection();
+
+    // Set up a background connection polling routine
+    const interval = setInterval(() => {
+      fetch(`${API_BASE_URL}/products`, { headers })
+        .then(r => {
+          if (r.ok) {
+            setIsOfflineMode(false);
+          }
+        })
+        .catch(() => {
+          // Silent fallback, keeps offline mode active until connection succeeds
+        });
+    }, 2000);
+
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => { loadProducts(); }, [currentUser, isOfflineMode]);
