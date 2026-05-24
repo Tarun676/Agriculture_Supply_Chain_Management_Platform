@@ -1,20 +1,62 @@
-# 🌾 Agriculture Supply Chain Platform (MVP - Phase 1)
+# 🌾 AgriExchange: High-Performance Real-Time Agricultural Commodity Trading Platform
 
-> **Cloud-Native Agriculture Supply Chain Platform with Real-Time Bidding**
-> A modern, robust, and scalable platform that empowers farmers to list their agricultural products and buyers to place transparent, real-time bids. Built as an enterprise-grade Capstone Project.
+> **AgriExchange Core v2.4 (Enterprise Edition)**
+> A professional, secure, containerized commodity trading and real-time auction platform designed to bridge verified agricultural growers directly with bulk institutional buyers. Wired with stateless cryptography, live WebSocket transactional streams, and executive-level auditing controls.
+
+---
+
+## 🎨 Enterprise Product Highlights & Features
+
+### 1. 🛡️ Self-Contained Stateless JWT Cryptography
+To enforce enterprise security, the platform operates a stateless, high-performance authorization interceptor built with custom Java cryptography:
+*   **Cryptographic Signatures:** Token signatures are hashed with high-entropy **HMAC-SHA256** Base64 URL algorithms.
+*   **Request Interception:** Stateless filters validate Bearer headers and establish context for protected resource routes.
+*   **Security Precaution:** Login checks differentiate errors exactly. If a user enters a registered email but an incorrect password, it secures responses with a precise password-incorrect prompt rather than disclosing account existence (preventing email enumeration attacks).
+
+### 2. 🌐 Native HTML5 Real-Time WebSocket Streams
+*   **Sub-Second Outbid Pushes:** Integrates native browser HTML5 WebSockets with Spring WebSocket handlers to broadcast transactional bid updates across concurrent active screens instantly.
+*   **Instant UI Syncing:** Outbid notifications slide onto screen layers using glassmorphic overlay toasts, refreshing listing states, tables, and ledgers in real-time without manual page refreshes.
+
+### 3. ⏳ Live countdowns, lockouts, & Time-Based Sorting
+*   **Time-Based Sorting:** active crop auctions are automatically sorted at the database load level by **time remaining (ascending)**, guaranteeing listings closing soonest are prioritized at the top of the feed.
+*   **Visual Muting:** Expired listings are grayscaled, faded (opacity `0.65`), shifted to the absolute bottom of the catalog, and their bidding desks, numeric forms, and action triggers are automatically locked out.
+
+### 📊 4. Live scrolling SVG transaction Flow Monitor
+*   **Dynamic SVG Wave:** The administrator console displays a state-driven, dynamic SVG curve representing transaction load.
+*   **Scrolling ticker:** An active background routine shifts the coordinate values leftwards smoothly every 3 seconds, representing live network throughput.
+
+### 📜 5. Legally Compliant Auction Audit Reports
+*   **Tab Integration:** Admins can access a dedicated auditing panel to select any active or completed harvest.
+*   **Official Auditing Ledger:** Instantly compiles an official commercial audit report calculating:
+    *   Crop properties, grower details, and volumes.
+    *   **Projected/Final Gross Value** (`highestBid * quantity`).
+    *   Chronological **Bid Ledger Timeline** tracking bidder initials avatar bubbles, names, bid value, and timestamps down to the exact second.
 
 ---
 
 ## 🏗️ Architecture & Technology Stack
 
-The platform is designed with a cloud-native, microservices-ready architecture:
+```mermaid
+graph TD
+    User([End User / Browser]) -->|HTTP / HTTPS| Ingress[NGINX Frontend Container - Port 3000]
+    
+    subgraph Local Orchestrated Stack (Docker Compose)
+        Ingress -->|Static React App| HTML[React 19 served via Nginx Proxy]
+        Ingress -->|Proxy REST: /api/* | SpringBoot[Spring Boot Core - Port 8080]
+        Ingress -->|Proxy Socket: /ws/* | WebSockets[Spring Websockets - Port 8080]
+        
+        SpringBoot -->|Stateless Bearer JWT Validation| Security[Spring Security Config]
+        SpringBoot -->|JPA / JDBC Connection| PostgreSQL[(PostgreSQL 15 - Port 5432)]
+        
+        pgAdmin[pgAdmin UI - Port 5050] -.->|Admin Tools| PostgreSQL
+    end
+```
 
-- **Backend:** Java 17 + Spring Boot 3.x + Maven
-- **Database:** PostgreSQL (Containerized via Docker Compose)
-- **Containerization:** Docker (Multi-stage build) & Docker Compose
-- **Security:** Secure custom authentication using **BCrypt** password hashing
-- **CI/CD:** GitHub Actions (Build, compile, and test workflow)
-- **Frontend:** React + Vite (Dynamic dashboard & real-time bidding simulation)
+*   **Backend:** Java 17 + Spring Boot 3.2.5 + Maven (Spring Web, Security, JPA, Websocket)
+*   **Database:** PostgreSQL 15 (Alpine)
+*   **Frontend:** React 19 + Vite (Vanilla CSS modern dark-slate design system, glassmorphism)
+*   **Containerization & Server:** Docker (multi-stage JRE and Nginx proxy configs) & Docker Compose
+*   **CI/CD Pipeline:** GitHub Actions (Validates compilation, runs tests, and builds docker layers)
 
 ---
 
@@ -22,109 +64,81 @@ The platform is designed with a cloud-native, microservices-ready architecture:
 
 ```text
 agri-platform/
-├── .github/
-│   └── workflows/
-│       └── ci.yml             # GitHub Actions CI Workflow
-├── backend/                   # Spring Boot REST API
-│   ├── Dockerfile             # Multi-stage production Dockerfile
-│   └── pom.xml                # Maven Dependencies & Configuration
-├── frontend/                  # React Frontend
-├── docs/                      # Architectural & API Documentation
-├── docker-compose.yml         # Local Environment Orchestration (DB + Backend)
-└── README.md                  # Main project landing documentation
+├── .github/workflows/
+│   └── ci.yml             # Cloud CI validation (Java compile & Vite assets build)
+├── backend/                   # Spring Boot Enterprise API
+│   ├── Dockerfile             # Multi-stage production Java JRE container
+│   ├── pom.xml                # Core maven dependencies (Web, Security, JPA, Postgres)
+│   └── src/main/java/com/agri/platform/
+│       ├── config/            # JWT TokenService, SecurityConfig, Websockets, Seeder
+│       ├── controller/        # Auth REST Endpoints, Bids, and Moderator controls
+│       ├── entity/            # JPA Data Entities (User, Product, Bid, Order)
+│       └── service/           # Security and Transaction business logic
+├── frontend/                  # React Frontend client
+│   ├── src/
+│   │   ├── App.jsx            # Main app router, role view desks, and overlays
+│   │   ├── index.css          # Vanilla corporate HSL design system and muting rules
+│   │   └── main.jsx           # Client initiator
+│   ├── Dockerfile             # SPA Nginx server build container
+│   ├── nginx.conf             # Ingress proxy path routes
+│   └── package.json           # React dependencies
+└── docker-compose.yml         # Local microservice cluster launcher
 ```
 
 ---
 
-## 🚀 Quick Start Guide
+## 🚀 Rebuilding & Running the Stack Locally
 
 ### Prerequisites
-Before running the platform, ensure you have the following installed:
-- [Docker & Docker Compose](https://www.docker.com/products/docker-desktop/)
-- [Java 17+ JDK](https://adoptium.net/temurin/releases/?version=17) (Optional, if running backend locally without Docker)
-- [Node.js v18+](https://nodejs.org/) (Optional, if running frontend locally without Docker)
+Make sure you have [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed on your machine.
+
+### Run in Detached Mode (Production-ready)
+To start your entire secure microservice stack in the background:
+```bash
+docker compose up -d --build
+```
+
+### Access Ports
+*   **Platform Portal (NGINX SPA):** [http://localhost:3000](http://localhost:3000)
+*   **Spring Boot core REST API:** [http://localhost:8080](http://localhost:8080)
+*   **pgAdmin DB Console:** [http://localhost:5050](http://localhost:5050)
+    *   *pgAdmin Credentials:* `admin@agriplatform.com` / `adminpassword`
 
 ---
 
-### Running the Complete Platform (Backend + DB)
+## 🎭 Pre-registered Presentation Credentials
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/Tarun676/Agriculture_Supply_Chain_Management_Platform.git
-   cd Agriculture_Supply_Chain_Management_Platform
-   ```
+Use these verified platform accounts to demonstrate role-based workflows:
 
-2. **Start the Infrastructure (Database + pgAdmin):**
-   ```bash
-   docker compose up -d agri-db agri-pgadmin
-   ```
-   *Note: This starts PostgreSQL on port `5432` and pgAdmin on `http://localhost:5050`.*
-   - **pgAdmin Login:** `admin@agriplatform.com` / `adminpassword`
-   - **pgAdmin Connection:** Host: `agri-db`, Port: `5432`, Username: `postgres`, Password: `postgrespassword`, DB: `agri_db`
-
-3. **Run the Spring Boot Backend (Local Development Mode):**
-   ```bash
-   cd backend
-   mvn spring-boot:run
-   ```
-   *The backend will boot up on `http://localhost:8080`.*
-
-4. **Verify Backend APIs:**
-   You can verify the backend APIs using your favorite REST client (e.g., Postman or curl).
+| Role | Email Address | Password | Features to Showcase |
+| :--- | :--- | :--- | :--- |
+| **Root Admin** | `penumuditarun@gmail.com` | `Tarun@0607` | Statistical KPIs, registry tables, live scrolling transaction flow monitor, and Auction Audit Reports. |
+| **Organic Grower** | `farmer@agri.com` | `farmer@123` | Publish new crop harvests, select state, customize flash-bidding countdown timers, and live grower auction deck. |
+| **Institutional Buyer** | `buyer@agri.com` | `buyer@123` | Real-time bidding desks, live minimum bid calculation limits, outbid alert toasts, and visual lockouts. |
 
 ---
 
-## 🔌 API Documentation (v1)
+## 🔌 Core Enterprise API Endpoints
 
-### Authentication
-- **Register:** `POST /api/auth/register`
-  ```json
-  {
-    "name": "John Farmer",
-    "email": "farmer@agri.com",
-    "password": "securepassword",
-    "role": "FARMER"
-  }
-  ```
-- **Login:** `POST /api/auth/login`
-  ```json
-  {
-    "email": "farmer@agri.com",
-    "password": "securepassword"
-  }
-  ```
+All endpoints except authentication are protected and require a Bearer token: `Authorization: Bearer <JWT_TOKEN>`
 
-### Products
-- **Create Product:** `POST /api/products` (Requires request body with `farmerId` matching a registered user)
-  ```json
-  {
-    "name": "Premium Basmati Rice",
-    "description": "Long-grain aromatic rice, harvested organically.",
-    "price": 2.50,
-    "quantity": 1000.0,
-    "farmerId": 1
-  }
-  ```
-- **Get All Products:** `GET /api/products`
+### Authentication Server
+*   `POST /api/auth/register` - Registers a verified Grower or institutional Buyer.
+*   `POST /api/auth/login` - Validates credentials and returns JWT bearer tokens.
 
-### Bidding
-- **Place a Bid:** `POST /api/bids`
-  ```json
-  {
-    "bidAmount": 2.80,
-    "productId": 1,
-    "buyerId": 2
-  }
-  ```
-- **Get Bids for Product:** `GET /api/bids/product/{productId}`
-  *Returns all bids for the product ordered by amount (highest first).*
+### Commodity Catalog
+*   `POST /api/products` - Growers publish a crop harvest with custom durations and base rates.
+*   `GET /api/products` - Returns active listings sorted by soonest closing time, and ended listings at the bottom.
+*   `DELETE /api/products/{id}` - Administrators moderate and remove crop listings.
+
+### Transactional Bidding Engine
+*   `POST /api/bids` - Places a validated secure bid (requires exceeding current highest bid by at least ₹1.00).
+*   `GET /api/bids/product/{productId}` - Retrieves chronological bid ledgers for a product (highest first).
 
 ---
 
-## 📈 Roadmap & Capstone Milestones
-- [x] **Phase 1: Foundation MVP** (Current) - Spring Boot Core + PostgreSQL + Docker Compose + CI/CD
-- [ ] **Phase 2: Monolith Expansion** - Full Database Schema, Real-Time WebSockets Bidding, Spring Security
-- [ ] **Phase 3: Caching & Optimization** - Redis caching for active highest bids and quick lookup
-- [ ] **Phase 4: Microservices Transition** - Decomposition into User, Product, Bid, and Order services
-- [ ] **Phase 5: Messaging & Eventing** - RabbitMQ integration for async event processing
-- [ ] **Phase 6: Cloud-Native & DevOps** - Kubernetes deployment manifests, EKS/AWS hosting, Prometheus metrics
+## 🛡️ High-Performance CI/CD Validation
+On every commit to `main`, the `.github/workflows/ci.yml` pipeline triggers in parallel:
+1.  **JDK Setup & Build:** Loads Java 17 and compiles the Spring Boot source files.
+2.  **Vite Assembly:** Compiles React frontend files for production bundle verification.
+3.  **Dockerization Audits:** Validates both multi-stage Dockerfiles (`frontend/Dockerfile` & `backend/Dockerfile`) in a cloud runner to ensure 100% containerization integrity.
