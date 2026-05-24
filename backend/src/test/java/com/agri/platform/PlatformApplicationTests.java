@@ -9,6 +9,7 @@ import com.agri.platform.repository.UserRepository;
 import com.agri.platform.service.BidService;
 import com.agri.platform.service.ProductService;
 import com.agri.platform.service.UserService;
+import com.agri.platform.config.BiddingWebSocketHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -43,6 +44,9 @@ class PlatformApplicationTests {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private BiddingWebSocketHandler biddingWebSocketHandler;
+
     private UserService userService;
     private ProductService productService;
     private BidService bidService;
@@ -52,7 +56,7 @@ class PlatformApplicationTests {
         MockitoAnnotations.openMocks(this);
         userService = new UserService(userRepository, passwordEncoder);
         productService = new ProductService(productRepository, userService);
-        bidService = new BidService(bidRepository, productService, userService);
+        bidService = new BidService(bidRepository, productService, userService, biddingWebSocketHandler);
     }
 
     @Test

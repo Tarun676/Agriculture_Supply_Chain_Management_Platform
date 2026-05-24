@@ -1,6 +1,7 @@
 package com.agri.platform.entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
@@ -19,13 +20,21 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    // Valid values: FARMER, BUYER, ADMIN
     @Column(nullable = false)
-    private String role; // "FARMER", "BUYER", "ADMIN"
+    private String role;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 
     // Default Constructor
     public User() {}
 
-    // All Arguments Constructor
     public User(Long id, String name, String email, String password, String role) {
         this.id = id;
         this.name = name;
@@ -34,51 +43,21 @@ public class User {
         this.role = role;
     }
 
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
-
-    // Custom Builder Pattern to support service/test compatibility
-    public static UserBuilder builder() {
-        return new UserBuilder();
-    }
+    // Builder Pattern
+    public static UserBuilder builder() { return new UserBuilder(); }
 
     public static class UserBuilder {
         private Long id;
@@ -87,33 +66,21 @@ public class User {
         private String password;
         private String role;
 
-        public UserBuilder id(Long id) {
-            this.id = id;
-            return this;
-        }
-
-        public UserBuilder name(String name) {
-            this.name = name;
-            return this;
-        }
-
-        public UserBuilder email(String email) {
-            this.email = email;
-            return this;
-        }
-
-        public UserBuilder password(String password) {
-            this.password = password;
-            return this;
-        }
-
-        public UserBuilder role(String role) {
-            this.role = role;
-            return this;
-        }
+        public UserBuilder id(Long id) { this.id = id; return this; }
+        public UserBuilder name(String name) { this.name = name; return this; }
+        public UserBuilder email(String email) { this.email = email; return this; }
+        public UserBuilder password(String password) { this.password = password; return this; }
+        public UserBuilder role(String role) { this.role = role; return this; }
 
         public User build() {
-            return new User(id, name, email, password, role);
+            User u = new User();
+            u.id = this.id;
+            u.name = this.name;
+            u.email = this.email;
+            u.password = this.password;
+            u.role = this.role;
+            return u;
         }
     }
 }
+

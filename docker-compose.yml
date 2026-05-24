@@ -11,6 +11,11 @@ services:
       POSTGRES_DB: agri_db
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -28,7 +33,41 @@ services:
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     depends_on:
-      - agri-db
+      agri-db:
+        condition: service_healthy
+    networks:
+      - agri-network
+
+  agri-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: agri-backend
+    restart: always
+    environment:
+      DB_HOST: agri-db
+      DB_PORT: 5432
+      DB_NAME: agri_db
+      DB_USER: postgres
+      DB_PASSWORD: postgrespassword
+    ports:
+      - "8080:8080"
+    depends_on:
+      agri-db:
+        condition: service_healthy
+    networks:
+      - agri-network
+
+  agri-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: agri-frontend
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      - agri-backend
     networks:
       - agri-network
 
