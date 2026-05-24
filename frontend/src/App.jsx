@@ -1694,8 +1694,12 @@ export default function App() {
     const checkConnection = () => {
       fetch(`${API_BASE_URL}/products`, { headers })
         .then(r => {
-          if (!r.ok) throw new Error();
-          setIsOfflineMode(false);
+          // If the server returns 200 (ok) or 401 (unauthorized), it is alive and actively listening!
+          if (r.ok || r.status === 401) {
+            setIsOfflineMode(false);
+          } else {
+            setIsOfflineMode(true);
+          }
         })
         .catch(() => {
           setIsOfflineMode(true);
@@ -1709,12 +1713,12 @@ export default function App() {
     const interval = setInterval(() => {
       fetch(`${API_BASE_URL}/products`, { headers })
         .then(r => {
-          if (r.ok) {
+          if (r.ok || r.status === 401) {
             setIsOfflineMode(false);
           }
         })
         .catch(() => {
-          // Silent fallback, keeps offline mode active until connection succeeds
+          // Silent fallback, keeps offline mode active if connection is completely refused
         });
     }, 2000);
 
