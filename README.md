@@ -40,7 +40,7 @@ To enforce enterprise security, the platform operates a stateless, high-performa
 graph TD
     User([End User / Browser]) -->|HTTP / HTTPS| Ingress[NGINX Frontend Container - Port 3000]
     
-    subgraph Local Orchestrated Stack (Docker Compose)
+    subgraph "Local Orchestrated Stack (Docker Compose)"
         Ingress -->|Static React App| HTML[React 19 served via Nginx Proxy]
         Ingress -->|Proxy REST: /api/* | SpringBoot[Spring Boot Core - Port 8080]
         Ingress -->|Proxy Socket: /ws/* | WebSockets[Spring Websockets - Port 8080]
